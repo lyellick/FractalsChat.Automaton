@@ -24,11 +24,13 @@ namespace FractalsChat.Automaton.WorkerService
         {
             using IServiceScope scope = _services.CreateScope();
 
-            IIRCNetworkSessionService sessonService = scope.ServiceProvider.GetRequiredService<IIRCNetworkSessionService>();
+            FractalsChatContext context = scope.ServiceProvider.GetRequiredService<FractalsChatContext>();
+
+            await context.Database.EnsureCreatedAsync();
 
             while (!stoppingToken.IsCancellationRequested)
             {
-                await sessonService.LoadSessionsAsync();
+                
             }
         }
     }

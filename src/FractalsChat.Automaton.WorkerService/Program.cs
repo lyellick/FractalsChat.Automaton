@@ -14,16 +14,8 @@ IHost host = Host.CreateDefaultBuilder(args)
         services
             .Configure<AppSettings>(options => hostContext.Configuration.GetSection("AppSettings").Bind(options))
             .AddDbContext<FractalsChatContext>(options => options.UseLazyLoadingProxies().UseSqlite(connectionString))
-            .AddScoped<IIRCNetworkSessionService, IRCNetworkSessionService>()
-            .AddScoped<IIRCNetworkListenerService, IRCNetworkListenerService>()
             .AddHostedService<Worker>();
     })
     .Build();
-
-using IServiceScope scope = host.Services.CreateScope();
-
-FractalsChatContext context = scope.ServiceProvider.GetRequiredService<FractalsChatContext>();
-
-await context.Database.EnsureCreatedAsync();
 
 await host.RunAsync();
