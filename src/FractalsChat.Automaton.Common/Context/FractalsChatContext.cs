@@ -26,9 +26,7 @@ namespace FractalsChat.Automaton.Common.Context
         {
         }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder builder)
-        {
-        }
+        protected override void OnConfiguring(DbContextOptionsBuilder builder) => builder.UseSqlite($"Data Source={_path}");
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
