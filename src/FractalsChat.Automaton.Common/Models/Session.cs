@@ -16,6 +16,11 @@ namespace FractalsChat.Automaton.Common.Models
         /// <summary>
         /// Foreign key of the channel entity.
         /// </summary>
+        public int NetworkId { get; set; }
+
+        /// <summary>
+        /// Foreign key of the channel entity.
+        /// </summary>
         public int ChannelId { get; set; }
 
         /// <summary>
@@ -29,6 +34,11 @@ namespace FractalsChat.Automaton.Common.Models
         public DateTimeOffset? Started { get; set; } = null;
 
         /// <summary>
+        /// Guid of session.
+        /// </summary>
+        public Guid SessionGuid { get; set; }
+
+        /// <summary>
         /// Channel information.
         /// </summary>
         public virtual Channel Channel { get; set; }
@@ -37,5 +47,10 @@ namespace FractalsChat.Automaton.Common.Models
         /// Bot information
         /// </summary>
         public virtual Bot Bot { get; set; }
+
+        /// <summary>
+        /// Network information
+        /// </summary>
+        public virtual Network Network { get; set; }
     }
 }

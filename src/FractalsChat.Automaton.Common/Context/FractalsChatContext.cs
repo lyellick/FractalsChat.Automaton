@@ -13,24 +13,24 @@ namespace FractalsChat.Automaton.Common.Context
         public virtual DbSet<Channel> Channels { get; set; }
         public virtual DbSet<Bot> Bots { get; set; }
 
-        private readonly string _path;
-
         public FractalsChatContext()
         {
-            Environment.SpecialFolder folder = Environment.SpecialFolder.LocalApplicationData;
-            string path = Environment.GetFolderPath(folder);
-            _path = Path.Join(path, "fractalschat.db");
         }
 
         public FractalsChatContext(DbContextOptions<FractalsChatContext> options) : base(options)
         {
         }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder builder) => builder.UseSqlite($"Data Source={_path}");
+        protected override void OnConfiguring(DbContextOptionsBuilder builder)
+        {
+        }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
+
+            foreach (IMutableEntityType entityType in builder.Model.GetEntityTypes())
+                builder.Entity(entityType.ClrType).ToTable(entityType.ClrType.Name);
 
             builder.Entity<Network>(entity =>
             {
@@ -50,14 +50,14 @@ namespace FractalsChat.Automaton.Common.Context
             {
                 entity.HasData(
                     new Bot() { BotId = 1, Nickname = "fluxbot", Description = "Bot Used Within the Fractals Chat IRC Network", Gecos = "Fluxbot v1.0 (fractals.chat)", 
-                                Ident = "fluxbot", Password = "", Created = DateTimeOffset.UtcNow }
+                                Ident = "fluxbot", Password = "", Created = DateTimeOffset.UtcNow, BotGuid = Guid.NewGuid() }
                 );
             });
 
             builder.Entity<Session>(entity =>
             {
                 entity.HasData(
-                    new Session() { SessionId = 1, ChannelId = 1, BotId = 1 }
+                    new Session() { SessionId = 1, NetworkId = 1, ChannelId = 1, BotId = 1, SessionGuid = Guid.NewGuid() }
                 );
             });
         }

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace FractalsChat.Automaton.WorkerService.Models
+﻿namespace FractalsChat.Automaton.WorkerService.Models
 {
     public class AppSettings
     {

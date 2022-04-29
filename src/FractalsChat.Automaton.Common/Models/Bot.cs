@@ -45,7 +45,7 @@
         /// <summary>
         /// Unique guid of the bot entity.
         /// </summary>
-        public Guid botGuid { get; set; }
+        public Guid BotGuid { get; set; }
 
     }
 }

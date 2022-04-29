@@ -36,12 +36,6 @@
         /// Date and time the channel was updated.
         /// </summary>
         public DateTimeOffset? Modified { get; set; } = null;
-
-        /// <summary>
-        /// Session information.
-        /// </summary>
-        public virtual Session Session { get; set; }
-
     }
 
     public partial class Channel
