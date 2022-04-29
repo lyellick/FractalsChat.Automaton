@@ -45,6 +45,7 @@ namespace FractalsChat.Automaton.Common
         public readonly int Port;
 
         private readonly NetworkStream _stream;
+        
         private readonly TcpClient _client;
 
         public IRCNetworkConnection(string hostname, int port)

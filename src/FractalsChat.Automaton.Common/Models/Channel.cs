@@ -36,6 +36,11 @@
         /// Date and time the channel was updated.
         /// </summary>
         public DateTimeOffset? Modified { get; set; } = null;
+
+        /// <summary>
+        /// Channel log information.
+        /// </summary>
+        public virtual ICollection<ChannelLog> ChannelLogs { get; set; }
     }
 
     public partial class Channel

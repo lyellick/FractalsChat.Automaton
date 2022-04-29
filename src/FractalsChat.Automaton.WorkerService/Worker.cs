@@ -11,23 +11,24 @@ namespace FractalsChat.Automaton.WorkerService
 
         private readonly AppSettings _settings;
 
-        public readonly IIRCNetworkAutomationService _automation;
+        public readonly IServiceProvider _services;
 
         public Worker(IOptions<AppSettings> options, ILogger<Worker> logger, IServiceProvider services)
         {
-            using IServiceScope scope = services.CreateScope();
-
-            _automation = scope.ServiceProvider.GetRequiredService<IIRCNetworkAutomationService>();
+            _services = services;
             _settings = options.Value;
             _logger = logger;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            using IServiceScope scope = _services.CreateScope();
+
+            IIRCNetworkSessionService sessonService = scope.ServiceProvider.GetRequiredService<IIRCNetworkSessionService>();
+
             while (!stoppingToken.IsCancellationRequested)
             {
-                _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
-                await Task.Delay(1000, stoppingToken);
+                await sessonService.LoadSessionsAsync();
             }
         }
     }
