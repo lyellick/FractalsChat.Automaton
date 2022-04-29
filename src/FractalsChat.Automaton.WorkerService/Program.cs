@@ -14,6 +14,8 @@ IHost host = Host.CreateDefaultBuilder(args)
         services
             .Configure<AppSettings>(options => hostContext.Configuration.GetSection("AppSettings").Bind(options))
             .AddDbContext<FractalsChatContext>(options => options.UseLazyLoadingProxies().UseSqlite(connectionString))
+            .AddScoped<IIRCNetworkAutomationService, IRCNetworkAutomationService>()
+            .AddScoped<IIRCNetworkSessionService, IRCNetworkSessionService>()
             .AddScoped<IIRCNetworkConnectionService, IRCNetworkConnectionService>()
             .AddHostedService<Worker>();
     })

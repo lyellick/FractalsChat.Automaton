@@ -18,9 +18,9 @@
         public string Description { get; set; }
 
         /// <summary>
-        /// Domain name of IRC network.
+        /// Hostname of IRC network.
         /// </summary>
-        public string Domain { get; set; }
+        public string Hostname { get; set; }
 
         /// <summary>
         /// Port for IRC network.

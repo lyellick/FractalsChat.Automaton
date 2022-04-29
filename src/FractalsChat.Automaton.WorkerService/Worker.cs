@@ -11,13 +11,13 @@ namespace FractalsChat.Automaton.WorkerService
 
         private readonly AppSettings _settings;
 
-        public readonly IIRCNetworkConnectionService _connection;
+        public readonly IIRCNetworkAutomationService _automation;
 
         public Worker(IOptions<AppSettings> options, ILogger<Worker> logger, IServiceProvider services)
         {
             using IServiceScope scope = services.CreateScope();
 
-            _connection = scope.ServiceProvider.GetRequiredService<IIRCNetworkConnectionService>();
+            _automation = scope.ServiceProvider.GetRequiredService<IIRCNetworkAutomationService>();
             _settings = options.Value;
             _logger = logger;
         }

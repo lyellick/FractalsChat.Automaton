@@ -35,7 +35,7 @@ namespace FractalsChat.Automaton.Common.Context
             builder.Entity<Network>(entity =>
             {
                 entity.HasData(
-                    new Network() { NetworkId = 1, Name = "Fractals Chat", Description = "Fractals Chat IRC Server", Domain = "irc.fractals.chat", Port = 6667 }
+                    new Network() { NetworkId = 1, Name = "Fractals Chat", Description = "Fractals Chat IRC Server", Hostname = "irc.fractals.chat", Port = 6667 }
                 );
             });
 
