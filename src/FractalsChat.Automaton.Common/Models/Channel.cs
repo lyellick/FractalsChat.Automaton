@@ -46,11 +46,11 @@
 
     public partial class Channel
     {
-        public string[] GetActiveMembers() => ActiveMembers.Split('\u002C');
+        public string[] GetActiveMembers() => ActiveMembers != null ? ActiveMembers.Split('\u002C') : Array.Empty<string>();
 
-        public string[] GetHistoricalMembers() => HistoricalMembers.Split('\u002C');
+        public string[] GetHistoricalMembers() => HistoricalMembers != null ? HistoricalMembers.Split('\u002C') : Array.Empty<string>();
 
-        public void UpdateActiveMembers(string[] members)
+        public void UpdateMembers(string[] members)
         {
             ActiveMembers = string.Join('\u002C', members);
 
