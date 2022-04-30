@@ -8,6 +8,11 @@
         UNASSIGNED,
 
         /// <summary>
+        /// Used to test user is listening to chat.
+        /// </summary>
+        BEEP,
+
+        /// <summary>
         /// Reminds the sended of a message in x seconds.
         /// </summary>
         REMINDME,

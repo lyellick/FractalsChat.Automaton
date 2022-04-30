@@ -1,6 +1,7 @@
 using FractalsChat.Automaton.Common;
 using FractalsChat.Automaton.Common.Context;
 using FractalsChat.Automaton.Common.Enums;
+using FractalsChat.Automaton.Common.Extensions;
 using FractalsChat.Automaton.Common.Models;
 using FractalsChat.Automaton.WorkerService.Models;
 using Microsoft.EntityFrameworkCore;
@@ -41,6 +42,21 @@ namespace FractalsChat.Automaton.WorkerService
                         await AddChannelLog(session.ChannelId, message.To, message.From, message.Body);
                     });
 
+
+                    // Listener: Bot Test
+                    networkSession.Listeners.Add(async (message, writer) => {
+                        if (message.Hook == ListenerHook.BEEP)
+                        {
+                            Task task = new(async () => {
+                                string body = "boop";
+                                await writer.SendAsync(session.Channel.Name, body);
+                                await AddChannelLog(session.ChannelId, session.Channel.Name, session.Bot.Nickname, body);
+                            });
+
+                            task.Start();
+                        }
+                    });
+
                     // Listener: Reminder
                     //      remindme 10 Remind me to do something
                     //      remindchannel 10 Remind the channel to do something
@@ -59,9 +75,7 @@ namespace FractalsChat.Automaton.WorkerService
                                 {
                                     Thread.Sleep(seconds * 1000);
                                     string body = $"~ Reminder: {reminder}";
-                                    await writer.WriteLineAsync($"PRIVMSG {to} :{body}");
-                                    await writer.FlushAsync();
-
+                                    await writer.SendAsync(to, body);
                                     await AddChannelLog(session.ChannelId, to, session.Bot.Nickname, body);
                                 });
 
