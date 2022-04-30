@@ -46,13 +46,12 @@ namespace FractalsChat.Automaton.Common
                             case CommandResponse.PRIVMSG:
                                 if (outputParts.Length > 2)
                                 {
-                                    Message message = new() 
-                                    { 
-                                        Parts = outputParts,
-                                        Reciver = outputParts[2],
-                                        Sender = output.Split('!')[0][1..],
-                                        Body = output.Split(':')[2]
-                                    };
+                                    string to = outputParts[2];
+                                    string body = output.Split(':')[2];
+                                    string from = output.Split('!')[0][1..];
+                                    Enum.TryParse(body.Split(' ')[0].ToUpper(), out ListenerHook hook);
+
+                                    Message message = new() { Hook = hook, Parts = outputParts, To = to, From = from, Body = body };
 
                                     foreach (var listener in Listeners)
                                         listener(message, _connection.Writer);

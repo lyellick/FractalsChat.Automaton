@@ -15,12 +15,12 @@
         /// <summary>
         /// Name of reciver.
         /// </summary>
-        public string Reciver { get; set; }
+        public string To { get; set; }
 
         /// <summary>
         /// Nickname of the sender.
         /// </summary>
-        public string Sender { get; set; }
+        public string From { get; set; }
 
         /// <summary>
         /// Message the sender sent.
