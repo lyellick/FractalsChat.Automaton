@@ -7,6 +7,9 @@ using FractalsChat.Automaton.Common.Models;
 using FractalsChat.Automaton.WorkerService.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System.Net;
 
 namespace FractalsChat.Automaton.WorkerService
 {
@@ -99,6 +102,25 @@ namespace FractalsChat.Automaton.WorkerService
                             await writer.SendAsync(session.Channel.Name, banner);
                             foreach (string row in banner)
                                 await AddChannelLog(session.ChannelId, session.Channel.Name, session.Bot.Nickname, row);
+                        }
+                    });
+
+                    // Listener: Banner
+                    networkSession.Listeners.Add(async (message, writer) => {
+                        if (message.Hook == ListenerHook.WEATHER)
+                        {
+                            string location = string.Join(" ", message.Parts.Skip(4));
+                            using HttpClient client = new();
+                            string json = await client.GetStringAsync($@"https://wttr.in/{location}?format=j1");
+                            try
+                            {
+                                JObject weather = JsonConvert.DeserializeObject<JObject>(json);
+                                string s = weather["current_condition"][0]["temp_F"].Value<string>();
+                            }
+                            catch
+                            {
+
+                            }
                         }
                     });
 

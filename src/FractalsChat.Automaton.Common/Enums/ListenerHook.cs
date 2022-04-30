@@ -25,6 +25,11 @@
         /// <summary>
         /// Writes a large banner to the chat.
         /// </summary>
-        BANNER
+        BANNER,
+
+        /// <summary>
+        /// Writes the weather for a location.
+        /// </summary>
+        WEATHER
     }
 }
