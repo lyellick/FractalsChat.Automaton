@@ -5,7 +5,7 @@ namespace FractalsChat.Automaton.Common
 {
     public class IRCNetworkSession : IDisposable
     {
-        public List<Action<string, string[], CommandResponse, StreamWriter>> Listeners;
+        public List<Action<Message, StreamWriter>> Listeners;
 
         private Session _session;
         
@@ -26,16 +26,16 @@ namespace FractalsChat.Automaton.Common
             {
                 try
                 {
-                    string message = await _connection.Reader.ReadLineAsync();
+                    string output = await _connection.Reader.ReadLineAsync();
 
-                    if (!string.IsNullOrEmpty(message))
+                    if (!string.IsNullOrEmpty(output))
                     {
-                        string[] messageParts = message.Split(' ');
+                        string[] outputParts = output.Split(' ');
 
-                        if (messageParts[0] == "PING")
+                        if (outputParts[0] == "PING")
                             await KeepAliveAsync();
 
-                        CommandResponse command = GetCommandResponse(messageParts[1]);
+                        CommandResponse command = GetCommandResponse(outputParts[1]);
 
                         switch (command)
                         {
@@ -44,9 +44,19 @@ namespace FractalsChat.Automaton.Common
                                 await JoinChannelAsync();
                                 break;
                             case CommandResponse.PRIVMSG:
-                                if (messageParts.Length > 2)
+                                if (outputParts.Length > 2)
+                                {
+                                    Message message = new() 
+                                    { 
+                                        Parts = outputParts,
+                                        Reciver = outputParts[2],
+                                        Sender = output.Split('!')[0][1..],
+                                        Body = output.Split(':')[2]
+                                    };
+
                                     foreach (var listener in Listeners)
-                                        listener(message, messageParts, command, _connection.Writer);
+                                        listener(message, _connection.Writer);
+                                }
                                 break;
                             default:
                                 break;

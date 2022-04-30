@@ -11,6 +11,7 @@ namespace FractalsChat.Automaton.Common.Context
         public virtual DbSet<Network> Networks { get; set; }
         public virtual DbSet<Session> Sessions { get; set; }
         public virtual DbSet<Channel> Channels { get; set; }
+        public virtual DbSet<ChannelLog> ChannelLogs { get; set; }
         public virtual DbSet<Bot> Bots { get; set; }
 
         public FractalsChatContext()

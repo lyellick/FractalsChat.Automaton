@@ -35,9 +35,12 @@ namespace FractalsChat.Automaton.WorkerService
                 Task instance = new(async () => {
                     using IRCNetworkSession networkSession = new(session);
 
-                    networkSession.Listeners.Add(async (message, messageParts, command, writer) => {
-                        await writer.WriteLineAsync($"PRIVMSG {session.Channel.Name} :test");
-                        await writer.FlushAsync();
+                    // Listener: Network Session Logs
+                    networkSession.Listeners.Add(async (message, writer) => {
+                        ChannelLog log = new() { ChannelId = session.ChannelId, Reciver = message.Reciver, Sender = message.Sender, Body = message.Body, Created = DateTimeOffset.UtcNow };
+                        
+                        await _context.ChannelLogs.AddAsync(log);
+                        await _context.SaveChangesAsync();
                     });
 
                     await networkSession.StartListeningAsync();

@@ -13,6 +13,11 @@
         public int ChannelId { get; set; }
 
         /// <summary>
+        /// Name of reciver.
+        /// </summary>
+        public string Reciver { get; set; }
+
+        /// <summary>
         /// Nickname of the sender.
         /// </summary>
         public string Sender { get; set; }
@@ -20,7 +25,7 @@
         /// <summary>
         /// Message the sender sent.
         /// </summary>
-        public string Message { get; set; }
+        public string Body { get; set; }
 
         /// <summary>
         /// Date and time the log was created.
