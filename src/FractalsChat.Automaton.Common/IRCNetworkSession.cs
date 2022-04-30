@@ -1,21 +1,21 @@
 ﻿using FractalsChat.Automaton.Common.Enums;
+using FractalsChat.Automaton.Common.Extensions;
 using FractalsChat.Automaton.Common.Models;
 
 namespace FractalsChat.Automaton.Common
 {
     public class IRCNetworkSession : IDisposable
     {
-        public List<Action<Message, StreamWriter>> Listeners;
-
         private Session _session;
-        
         private readonly IRCNetworkConnection _connection;
+
+        public List<Action<Message, StreamWriter>> Listeners = new();
+        public Action<string[]> OnActiveUsersChange = null;
 
         public IRCNetworkSession(Session session)
         {
             _session = session;
             _connection = new(_session);
-            Listeners = new();
         }
 
         public async Task StartListeningAsync()
@@ -43,18 +43,30 @@ namespace FractalsChat.Automaton.Common
                             case CommandResponse.ENDOFMOTD:
                                 await JoinChannelAsync();
                                 break;
+                            case CommandResponse.NAMREPLY:
+                                string[] members = output.Split("=")[1].Split(":")[1].Split(" ").Select(member => member.Replace("@", "")).ToArray();
+                                if (members.Length > 0)
+                                    OnActiveUsersChange?.Invoke(members);
+                                break;
+                            case CommandResponse.PART:
+                            case CommandResponse.JOIN:
+                                await RequestChannelUsersAsync();
+                                break;
                             case CommandResponse.PRIVMSG:
                                 if (outputParts.Length > 2)
                                 {
                                     string to = outputParts[2];
                                     string body = output.Split(':')[2];
                                     string from = output.Split('!')[0][1..];
-                                    Enum.TryParse(body.Split(' ')[0].ToUpper(), out ListenerHook hook);
+                                    bool isValidHook = Enum.TryParse(body.Split(' ')[0].ToUpper(), out ListenerHook hook);
 
-                                    Message message = new() { Hook = hook, Parts = outputParts, To = to, From = from, Body = body };
+                                    if (isValidHook)
+                                    {
+                                        Message message = new() { Hook = hook, Parts = outputParts, To = to, From = from, Body = body };
 
-                                    foreach (var listener in Listeners)
-                                        listener(message, _connection.Writer);
+                                        foreach (var listener in Listeners)
+                                            listener(message, _connection.Writer);
+                                    }
                                 }
                                 break;
                             default:
@@ -76,6 +88,13 @@ namespace FractalsChat.Automaton.Common
             await _connection.Writer.WriteLineAsync($"NICK {_session.Bot.Nickname}");
 
             await _connection.Writer.WriteLineAsync($"PRIVMSG NickServ :IDENTIFY {_session.Bot.Nickname} {_session.Bot.Password}");
+
+            await _connection.Writer.FlushAsync();
+        }
+
+        private async Task RequestChannelUsersAsync()
+        {
+            await _connection.Writer.WriteLineAsync($"NAMES {_session.Channel.Name}");
 
             await _connection.Writer.FlushAsync();
         }

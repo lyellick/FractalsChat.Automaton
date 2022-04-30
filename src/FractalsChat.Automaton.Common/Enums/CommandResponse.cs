@@ -21,6 +21,16 @@
         PRIVMSG = -2,
 
         /// <summary>
+        /// When a user joins channel <channel>{,<channel>} [<key>{,<key>}].
+        /// </summary>
+        JOIN = -3,
+
+        /// <summary>
+        /// When a user leaves the channel <channel>{,<channel>}.
+        /// </summary>
+        PART = -4,
+
+        /// <summary>
         /// Successfully connected to network.
         /// </summary>
         CONNECTED = 1,
@@ -53,6 +63,6 @@
         /// <summary>
         /// End of /NAMES list for <channel>.
         /// </summary>
-        ENDOFNAMES = 366
+        ENDOFNAMES = 366,
     }
 }

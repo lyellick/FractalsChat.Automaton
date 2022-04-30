@@ -37,11 +37,13 @@ namespace FractalsChat.Automaton.WorkerService
                 Task instance = new(async () => {
                     using IRCNetworkSession networkSession = new(session);
 
+                    // Trigger: Change to Active Users in Channel
+                    networkSession.OnActiveUsersChange = async (members) => await UpdateActiveChannelUsers(members, session.Channel);
+
                     // Listener: Network Session Logs
                     networkSession.Listeners.Add(async (message, writer) => {
                         await AddChannelLog(session.ChannelId, message.To, message.From, message.Body);
                     });
-
 
                     // Listener: Bot Test
                     networkSession.Listeners.Add(async (message, writer) => {
@@ -100,6 +102,13 @@ namespace FractalsChat.Automaton.WorkerService
             ChannelLog log = new() { ChannelId = channelId, To = to, From = from, Body = body, Created = DateTimeOffset.UtcNow };
 
             await _context.ChannelLogs.AddAsync(log);
+            await _context.SaveChangesAsync();
+        }
+
+        private async Task UpdateActiveChannelUsers(string[] members, Channel channel)
+        {
+            channel.UpdateMembers(members);
+
             await _context.SaveChangesAsync();
         }
     }

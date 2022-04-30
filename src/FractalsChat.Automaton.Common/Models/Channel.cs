@@ -59,6 +59,8 @@
             historicalMembers.AddRange(activeMembers.Except(historicalMembers));
 
             HistoricalMembers = string.Join('\u002C', historicalMembers);
+
+            Modified = DateTimeOffset.UtcNow;
         }
     }
 }
