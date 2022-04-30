@@ -36,7 +36,7 @@ namespace FractalsChat.Automaton.WorkerService
             foreach (Session session in sessions)
             {
                 Task instance = new(async () => {
-                    using IRCNetworkSession networkSession = new(session);
+                    using IRCNetworkSession networkSession = new(session, _settings.KeepAlive);
 
                     // Trigger: Change to Active Users in Channel
                     networkSession.OnActiveUsersChange = async (members) => await UpdateActiveChannelUsers(members, session.Channel);

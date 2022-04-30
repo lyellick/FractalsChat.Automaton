@@ -8,14 +8,16 @@ namespace FractalsChat.Automaton.Common
     {
         private Session _session;
         private readonly IRCNetworkConnection _connection;
+        private readonly int _keepalive;
 
         public List<Action<Message, StreamWriter>> Listeners = new();
         public Action<string[]> OnActiveUsersChange = null;
 
-        public IRCNetworkSession(Session session)
+        public IRCNetworkSession(Session session, int keepalive)
         {
             _session = session;
             _connection = new(_session);
+            _keepalive = keepalive;
         }
 
         public async Task StartListeningAsync()
@@ -121,7 +123,7 @@ namespace FractalsChat.Automaton.Common
 
                     await _connection.Writer.FlushAsync();
 
-                    Thread.Sleep(15000);
+                    Thread.Sleep(_keepalive * 1000);
                 }
 
             });
