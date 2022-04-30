@@ -13,11 +13,11 @@ namespace FractalsChat.Automaton.WorkerService
 
         private readonly AppSettings _settings;
 
-        public readonly IServiceProvider _services;
+        private readonly FractalsChatContext _context;
 
-        public Worker(IOptions<AppSettings> options, ILogger<Worker> logger, IServiceProvider services)
+        public Worker(IOptions<AppSettings> options, ILogger<Worker> logger, IConfiguration configuration)
         {
-            _services = services;
+            _context = new(new DbContextOptionsBuilder<FractalsChatContext>().UseLazyLoadingProxies().UseSqlite(configuration.GetConnectionString("DefaultConnection")).Options);
             _settings = options.Value;
             _logger = logger;
         }
@@ -26,31 +26,21 @@ namespace FractalsChat.Automaton.WorkerService
         {
             List<Task> instances = new();
 
-            DbContextOptionsBuilder<FractalsChatContext> builder = new DbContextOptionsBuilder<FractalsChatContext>();
+            await _context.Database.EnsureCreatedAsync();
 
-            builder.UseLazyLoadingProxies().UseSqlite("Data Source=Data/fractalschat.db");
-
-            FractalsChatContext context = new FractalsChatContext(builder.Options);
-
-            await context.Database.EnsureCreatedAsync();
-
-            List<Session> sessions = await context.Sessions.ToListAsync();
+            List<Session> sessions = await _context.Sessions.ToListAsync();
 
             foreach (Session session in sessions)
             {
                 Task instance = new(async () => {
-                    using IRCNetworkConnection connection = new(session);
-                    
-                    await connection.ConnectAsync();
+                    using IRCNetworkSession networkSession = new(session);
 
-                    IRCNetworkListener listener = new(connection);
-
-                    listener.Listeners.Add(async (message, messageParts, command, connection) => {
-                        await connection.Writer.WriteLineAsync($"PRIVMSG {session.Channel.Name} :test");
-                        await connection.Writer.FlushAsync();
+                    networkSession.Listeners.Add(async (message, messageParts, command, writer) => {
+                        await writer.WriteLineAsync($"PRIVMSG {session.Channel.Name} :test");
+                        await writer.FlushAsync();
                     });
 
-                    await listener.StartListeningAsync();
+                    await networkSession.StartListeningAsync();
                 });
 
                 instance.Start();
