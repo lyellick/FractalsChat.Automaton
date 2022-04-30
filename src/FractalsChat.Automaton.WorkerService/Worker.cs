@@ -1,6 +1,8 @@
+using FractalsChat.Automaton.Common;
 using FractalsChat.Automaton.Common.Context;
-using FractalsChat.Automaton.Common.Services;
+using FractalsChat.Automaton.Common.Models;
 using FractalsChat.Automaton.WorkerService.Models;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
 namespace FractalsChat.Automaton.WorkerService
@@ -22,16 +24,41 @@ namespace FractalsChat.Automaton.WorkerService
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            using IServiceScope scope = _services.CreateScope();
+            List<Task> instances = new();
 
-            FractalsChatContext context = scope.ServiceProvider.GetRequiredService<FractalsChatContext>();
+            DbContextOptionsBuilder<FractalsChatContext> builder = new DbContextOptionsBuilder<FractalsChatContext>();
+
+            builder.UseLazyLoadingProxies().UseSqlite("Data Source=Data/fractalschat.db");
+
+            FractalsChatContext context = new FractalsChatContext(builder.Options);
 
             await context.Database.EnsureCreatedAsync();
 
-            while (!stoppingToken.IsCancellationRequested)
+            List<Session> sessions = await context.Sessions.ToListAsync();
+
+            foreach (Session session in sessions)
             {
-                
+                Task instance = new(async () => {
+                    using IRCNetworkConnection connection = new(session);
+                    
+                    await connection.ConnectAsync();
+
+                    IRCNetworkListener listener = new(connection);
+
+                    listener.Listeners.Add(async (message, messageParts, command, connection) => {
+                        await connection.Writer.WriteLineAsync($"PRIVMSG {session.Channel.Name} :test");
+                        await connection.Writer.FlushAsync();
+                    });
+
+                    await listener.StartListeningAsync();
+                });
+
+                instance.Start();
+
+                instances.Add(instance);
             }
+
+            await Task.WhenAll(instances.ToArray());
         }
     }
 }

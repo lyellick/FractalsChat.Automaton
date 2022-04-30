@@ -1,5 +1,4 @@
 using FractalsChat.Automaton.Common.Context;
-using FractalsChat.Automaton.Common.Services;
 using FractalsChat.Automaton.WorkerService;
 using FractalsChat.Automaton.WorkerService.Models;
 using Microsoft.EntityFrameworkCore;
@@ -13,7 +12,6 @@ IHost host = Host.CreateDefaultBuilder(args)
 
         services
             .Configure<AppSettings>(options => hostContext.Configuration.GetSection("AppSettings").Bind(options))
-            .AddDbContext<FractalsChatContext>(options => options.UseLazyLoadingProxies().UseSqlite(connectionString))
             .AddHostedService<Worker>();
     })
     .Build();

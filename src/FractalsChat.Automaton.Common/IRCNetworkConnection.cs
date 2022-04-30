@@ -1,4 +1,6 @@
-﻿using System;
+﻿using FractalsChat.Automaton.Common.Enums;
+using FractalsChat.Automaton.Common.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
@@ -9,64 +11,78 @@ namespace FractalsChat.Automaton.Common
 {
     public class IRCNetworkConnection : IDisposable
     {
-        /// <summary>
-        /// Returns the connection status for this instance.
-        /// </summary>
         public bool IsConnected => _client.Connected;
+        public List<Action<string, string[], CommandResponse, IRCNetworkConnection>> Listeners;
 
-        /// <summary>
-        /// The time when the connection was opened.
-        /// </summary>
-        public readonly DateTimeOffset Opened;
-
-        /// <summary>
-        /// Write buffer for the connection.
-        /// </summary>
         public readonly StreamWriter Writer;
-
-        /// <summary>
-        /// Read bugger for the connection.
-        /// </summary>
         public readonly StreamReader Reader;
 
-        /// <summary>
-        /// Unique identifier of the connection instance.
-        /// </summary>
-        public readonly Guid Identifier;
-
-        /// <summary>
-        /// Hostname used to open the connection.
-        /// </summary>
-        public readonly string Hostname;
-
-        /// <summary>
-        /// Post used to open the connection.
-        /// </summary>
-        public readonly int Port;
+        private Session _session;
 
         private readonly NetworkStream _stream;
-        
         private readonly TcpClient _client;
 
-        public IRCNetworkConnection(string hostname, int port)
+        public IRCNetworkConnection(Session session)
         {
-            _client = new TcpClient(hostname, port);
+            _client = new TcpClient();
+            _client.Connect(session.Network.Hostname, session.Network.Port);
             _stream = _client.GetStream();
+            _session = session;
 
             Writer = new StreamWriter(_stream);
             Reader = new StreamReader(_stream);
-
-            Opened = DateTimeOffset.UtcNow;
-            Identifier = Guid.NewGuid();
-            Hostname = hostname;
-            Port = port;
+            Listeners = new();
         }
 
+        public async Task ConnectAsync()
+        {
+            await Writer.WriteLineAsync($"USER {_session.Bot.Ident} * 8 {_session.Bot.Gecos}");
+
+            await Writer.WriteLineAsync($"NICK {_session.Bot.Nickname}");
+
+            await Writer.WriteLineAsync($"PRIVMSG NickServ :IDENTIFY {_session.Bot.Nickname} {_session.Bot.Password}");
+
+            await Writer.FlushAsync();
+        }
+
+        public async Task JoinChannelAsync(string message = null)
+        {
+            await Writer.WriteLineAsync($"JOIN {_session.Channel.Name}");
+
+            if (!string.IsNullOrEmpty(message))
+                await Writer.WriteLineAsync($"PRIVMSG {_session.Channel.Name} :{message}");
+
+            await Writer.FlushAsync();
+        }
+
+        public async Task KeepAliveAsync()
+        {
+            await Writer.WriteLineAsync("PONG");
+
+            await Writer.FlushAsync();
+        }
+
+        public static CommandResponse GetCommandResponse(string command)
+        {
+            CommandResponse commandResponse;
+
+            bool isCommandResponseCode = int.TryParse(command, out int commandResponseCode);
+
+            if (isCommandResponseCode)
+            {
+                commandResponse = (CommandResponse)commandResponseCode;
+            }
+            else
+            {
+                Enum.TryParse(command, out commandResponse);
+            }
+
+            return commandResponse;
+        }
+
+        #region IDisposable
         private bool _disposed;
 
-        /// <summary>
-        /// Closes all instances where a connection has been opened.
-        /// </summary>
         private void CloseInstances()
         {
             Writer.Close();
@@ -84,14 +100,11 @@ namespace FractalsChat.Automaton.Common
                     CloseInstances();
         }
 
-        /// <summary>
-        /// Closes all underlying connections used.
-        /// </summary>
-        /// <param name="disposing"></param>
         public void Dispose()
         {
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
         }
+        #endregion
     }
 }
