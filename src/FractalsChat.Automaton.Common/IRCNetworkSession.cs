@@ -22,6 +22,8 @@ namespace FractalsChat.Automaton.Common
         {
             await ConnectAsync();
 
+            KeepAlive();
+
             while (_connection.IsConnected)
             {
                 try
@@ -31,9 +33,6 @@ namespace FractalsChat.Automaton.Common
                     if (!string.IsNullOrEmpty(output))
                     {
                         string[] outputParts = output.Split(' ');
-
-                        if (outputParts[0] == "PING")
-                            await KeepAliveAsync();
 
                         CommandResponse command = GetCommandResponse(outputParts[1]);
 
@@ -68,6 +67,8 @@ namespace FractalsChat.Automaton.Common
                                             listener(message, _connection.Writer);
                                     }
                                 }
+                                break;
+                            case CommandResponse.PONG:
                                 break;
                             default:
                                 break;
@@ -109,11 +110,23 @@ namespace FractalsChat.Automaton.Common
             await _connection.Writer.FlushAsync();
         }
 
-        private async Task KeepAliveAsync()
+        private void KeepAlive()
         {
-            await _connection.Writer.WriteLineAsync("PONG");
+            Task keepalive = new(async () =>
+            {
 
-            await _connection.Writer.FlushAsync();
+                while (true)
+                {
+                    await _connection.Writer.WriteLineAsync($"PING :{_session.Network.Hostname}");
+
+                    await _connection.Writer.FlushAsync();
+
+                    Thread.Sleep(15000);
+                }
+
+            });
+
+            keepalive.Start();
         }
 
         private static CommandResponse GetCommandResponse(string command)

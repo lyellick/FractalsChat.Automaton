@@ -31,6 +31,11 @@
         PART = -4,
 
         /// <summary>
+        /// Server responding to PING.
+        /// </summary>
+        PONG = -5,
+
+        /// <summary>
         /// Successfully connected to network.
         /// </summary>
         CONNECTED = 1,

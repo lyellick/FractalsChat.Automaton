@@ -20,6 +20,11 @@
         /// <summary>
         /// Reminds the channel of a message in x seconds.
         /// </summary>
-        REMINDCHANNEL
+        REMINDCHANNEL,
+
+        /// <summary>
+        /// Writes a large banner to the chat.
+        /// </summary>
+        BANNER
     }
 }

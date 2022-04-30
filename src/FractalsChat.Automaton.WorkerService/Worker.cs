@@ -1,3 +1,4 @@
+using Figgle;
 using FractalsChat.Automaton.Common;
 using FractalsChat.Automaton.Common.Context;
 using FractalsChat.Automaton.Common.Enums;
@@ -46,10 +47,12 @@ namespace FractalsChat.Automaton.WorkerService
                     });
 
                     // Listener: Bot Test
-                    networkSession.Listeners.Add(async (message, writer) => {
+                    networkSession.Listeners.Add((message, writer) =>
+                    {
                         if (message.Hook == ListenerHook.BEEP)
                         {
-                            Task task = new(async () => {
+                            Task task = new(async () =>
+                            {
                                 string body = "boop";
                                 await writer.SendAsync(session.Channel.Name, body);
                                 await AddChannelLog(session.ChannelId, session.Channel.Name, session.Bot.Nickname, body);
@@ -62,7 +65,8 @@ namespace FractalsChat.Automaton.WorkerService
                     // Listener: Reminder
                     //      remindme 10 Remind me to do something
                     //      remindchannel 10 Remind the channel to do something
-                    networkSession.Listeners.Add(async (message, writer) => {
+                    networkSession.Listeners.Add((message, writer) =>
+                    {
                         bool isReminder = message.Hook == ListenerHook.REMINDME || message.Hook == ListenerHook.REMINDCHANNEL;
                         if (isReminder)
                         {
@@ -83,6 +87,18 @@ namespace FractalsChat.Automaton.WorkerService
 
                                 task.Start();
                             }
+                        }
+                    });
+
+                    // Listener: Banner
+                    networkSession.Listeners.Add(async (message, writer) => {
+                        if (message.Hook == ListenerHook.BANNER)
+                        {
+                            string bannerMessage = string.Join(" ", message.Parts.Skip(4));
+                            string[] banner = FiggleFonts.Small.Render(bannerMessage).Split("\r\n");
+                            await writer.SendAsync(session.Channel.Name, banner);
+                            foreach (string row in banner)
+                                await AddChannelLog(session.ChannelId, session.Channel.Name, session.Bot.Nickname, row);
                         }
                     });
 
