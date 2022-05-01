@@ -13,14 +13,9 @@
         BEEP,
 
         /// <summary>
-        /// Reminds the sended of a message in x seconds.
+        /// Reminds the sended or channel of a message in x seconds.
         /// </summary>
-        REMINDME,
-
-        /// <summary>
-        /// Reminds the channel of a message in x seconds.
-        /// </summary>
-        REMINDCHANNEL,
+        REMIND,
 
         /// <summary>
         /// Writes a large banner to the chat.
@@ -28,23 +23,18 @@
         BANNER,
 
         /// <summary>
-        /// Writes the weather for a location to sender.
+        /// Writes the weather for a location to sender or channel.
         /// </summary>
-        WEATHERME,
+        WEATHER,
 
         /// <summary>
-        /// Writes the weather for a location to channel.
+        /// Writes a peice of widom to sender or channel.
         /// </summary>
-        WEATHERCHANNEL,
+        WISDOM,
 
         /// <summary>
-        /// Writes a peice of widom to sender.
+        /// Writes an activity for the sender or channel.
         /// </summary>
-        WISDOMME,
-
-        /// <summary>
-        /// Writes a peice of widom to channel.
-        /// </summary>
-        WISDOMCHANNEL
+        IMBORED
     }
 }
