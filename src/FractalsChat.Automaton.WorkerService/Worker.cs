@@ -134,8 +134,7 @@ namespace FractalsChat.Automaton.WorkerService
                                     $"~     {description}",
                                     $"~     F\u00B0 {currentTemp} (\u25B2 {highTemp}\u00B0 \u25BC {lowTemp}\u00B0)",
                                     $"~     Sunrise {sunrise} -> Sunset {sunset}",
-                                    $"~     Moon: {moon}",
-                                    $"~ End of Weather Report"
+                                    $"~     Moon: {moon}"
                                 };
 
                                 string to = message.Hook == ListenerHook.WEATHERME ? message.From : session.Channel.Name;
