@@ -86,7 +86,7 @@ namespace FractalsChat.Automaton.Common
 
         private async Task ConnectAsync()
         {
-            await _connection.Writer.WriteLineAsync($"USER {_session.Bot.Ident} * 8 {_session.Bot.Gecos}");
+            await _connection.Writer.WriteLineAsync($"USER {_session.Bot.Ident} {_session.Bot.Gecos}");
 
             await _connection.Writer.WriteLineAsync($"NICK {_session.Bot.Nickname}");
 
