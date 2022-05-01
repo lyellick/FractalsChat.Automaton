@@ -35,6 +35,16 @@
         /// <summary>
         /// Writes the weather for a location to channel.
         /// </summary>
-        WEATHERCHANNEL
+        WEATHERCHANNEL,
+
+        /// <summary>
+        /// Writes a peice of widom to sender.
+        /// </summary>
+        WISDOMME,
+
+        /// <summary>
+        /// Writes a peice of widom to channel.
+        /// </summary>
+        WISDOMCHANNEL
     }
 }

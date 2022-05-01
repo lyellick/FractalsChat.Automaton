@@ -106,6 +106,8 @@ namespace FractalsChat.Automaton.WorkerService
                     });
 
                     // Listener: Weather
+                    //      wetherme area,region
+                    //      wetherchannel area,region
                     networkSession.Listeners.Add(async (message, writer) => {
                         bool isWeather = message.Hook == ListenerHook.WEATHERME || message.Hook == ListenerHook.WEATHERCHANNEL;
                         if (isWeather)
@@ -138,6 +140,35 @@ namespace FractalsChat.Automaton.WorkerService
                                 };
 
                                 string to = message.Hook == ListenerHook.WEATHERME ? message.From : session.Channel.Name;
+
+                                await writer.SendAsync(to, body);
+                                await AddChannelLog(session.ChannelId, to, session.Bot.Nickname, body);
+                            }
+                            catch
+                            {
+
+                            }
+                        }
+                    });
+
+                    // Listener: Wisdom
+                    //      wisdomme
+                    //      widsomchannel
+                    networkSession.Listeners.Add(async (message, writer) => {
+                        bool isWisdom = message.Hook == ListenerHook.WISDOMME || message.Hook == ListenerHook.WISDOMCHANNEL;
+                        if (isWisdom)
+                        {
+                            using HttpClient client = new();
+                            string json = await client.GetStringAsync($@"https://api.kanye.rest/");
+                            try
+                            {
+                                JObject thinking = JsonConvert.DeserializeObject<JObject>(json);
+
+                                string wisdom = thinking["quote"].Value<string>();
+
+                                string body = $"~ Wisdom: {wisdom}";
+
+                                string to = message.Hook == ListenerHook.WISDOMME ? message.From : session.Channel.Name;
 
                                 await writer.SendAsync(to, body);
                                 await AddChannelLog(session.ChannelId, to, session.Bot.Nickname, body);
