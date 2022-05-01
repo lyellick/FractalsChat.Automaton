@@ -203,7 +203,7 @@ namespace FractalsChat.Automaton.WorkerService
                         }
                     });
 
-                    // Listener: Im Board
+                    // Listener: Im Bored
                     //      imbored [<user> | <channel>]
                     networkSession.Listeners.Add(async (message, writer) =>
                     {
