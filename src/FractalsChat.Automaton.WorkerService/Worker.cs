@@ -105,9 +105,10 @@ namespace FractalsChat.Automaton.WorkerService
                         }
                     });
 
-                    // Listener: Banner
+                    // Listener: Weather
                     networkSession.Listeners.Add(async (message, writer) => {
-                        if (message.Hook == ListenerHook.WEATHER)
+                        bool isWeather = message.Hook == ListenerHook.WEATHERME || message.Hook == ListenerHook.WEATHERCHANNEL;
+                        if (isWeather)
                         {
                             string location = string.Join(" ", message.Parts.Skip(4));
                             using HttpClient client = new();
@@ -115,7 +116,32 @@ namespace FractalsChat.Automaton.WorkerService
                             try
                             {
                                 JObject weather = JsonConvert.DeserializeObject<JObject>(json);
-                                string s = weather["current_condition"][0]["temp_F"].Value<string>();
+                                
+                                string area = weather["nearest_area"][0]["areaName"][0]["value"].Value<string>();
+                                string region = weather["nearest_area"][0]["region"][0]["value"].Value<string>();
+                                string latitude = weather["nearest_area"][0]["latitude"].Value<string>();
+                                string longitude = weather["nearest_area"][0]["longitude"].Value<string>();
+                                string highTemp = weather["weather"][0]["maxtempF"].Value<string>();
+                                string lowTemp = weather["weather"][0]["mintempF"].Value<string>();
+                                string currentTemp = weather["current_condition"][0]["temp_F"]  .Value<string>();
+                                string description = weather["current_condition"][0]["weatherDesc"][0]["value"].Value<string>();
+                                string sunrise = weather["weather"][0]["astronomy"][0]["sunrise"].Value<string>();
+                                string sunset = weather["weather"][0]["astronomy"][0]["sunset"].Value<string>();
+                                string moon = weather["weather"][0]["astronomy"][0]["moon_phase"].Value<string>();
+
+                                string[] body = new string[] {
+                                    $"~ Weather Report for {area}, {region} ({latitude}, {longitude}):",
+                                    $"~     {description}",
+                                    $"~     F\u00B0 {currentTemp} (\u25B2 {highTemp}\u00B0 \u25BC {lowTemp}\u00B0)",
+                                    $"~     Sunrise {sunrise} -> Sunset {sunset}",
+                                    $"~     Moon: {moon}",
+                                    $"~ End of Weather Report"
+                                };
+
+                                string to = message.Hook == ListenerHook.WEATHERME ? message.From : session.Channel.Name;
+
+                                await writer.SendAsync(to, body);
+                                await AddChannelLog(session.ChannelId, to, session.Bot.Nickname, body);
                             }
                             catch
                             {
@@ -140,6 +166,17 @@ namespace FractalsChat.Automaton.WorkerService
             ChannelLog log = new() { ChannelId = channelId, To = to, From = from, Body = body, Created = DateTimeOffset.UtcNow };
 
             await _context.ChannelLogs.AddAsync(log);
+            await _context.SaveChangesAsync();
+        }
+
+        private async Task AddChannelLog(int channelId, string to, string from, string[] body)
+        {
+            List<ChannelLog> logs = new List<ChannelLog>();
+
+            foreach (string row in body)
+                logs.Add(new() { ChannelId = channelId, To = to, From = from, Body = row, Created = DateTimeOffset.UtcNow });
+
+            await _context.ChannelLogs.AddRangeAsync(logs);
             await _context.SaveChangesAsync();
         }
 

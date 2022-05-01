@@ -28,8 +28,13 @@
         BANNER,
 
         /// <summary>
-        /// Writes the weather for a location.
+        /// Writes the weather for a location to sender.
         /// </summary>
-        WEATHER
+        WEATHERME,
+
+        /// <summary>
+        /// Writes the weather for a location to channel.
+        /// </summary>
+        WEATHERCHANNEL
     }
 }
